@@ -53,10 +53,18 @@ class Task:
 class TaskScheduler:
     """任务调度器，管理任务队列和执行"""
 
-    def __init__(self):
+    def __init__(self,
+                 retry_interval: int = 5,      # 重试间隔（秒）
+                 idle_interval: int = 1,       # 空闲间隔（秒）
+                 error_interval: int = 5):     # 错误间隔（秒）
         self.gpu_monitor = GPUMonitor()
         self.script_parser = ScriptParser()
         self.script_executor = ScriptExecutor()
+
+        # 配置检查间隔
+        self.retry_interval = retry_interval
+        self.idle_interval = idle_interval
+        self.error_interval = error_interval
 
         self.task_queue = queue.PriorityQueue()
         self.running_tasks = {}
@@ -67,7 +75,7 @@ class TaskScheduler:
         self.is_running = False
         self.lock = threading.Lock()
 
-        logging.info("任务调度器初始化完成")
+        logging.info(f"任务调度器初始化完成 - 重试间隔: {retry_interval}s, 空闲间隔: {idle_interval}s")
 
     def start(self):
         """启动调度器"""
@@ -223,13 +231,14 @@ class TaskScheduler:
                     else:
                         # 放回队列
                         self.task_queue.put((priority, task))
-                        time.sleep(5)  # 等待5秒后重试
+                        logging.debug(f"任务 {task.id} 等待GPU可用，{self.retry_interval}秒后重试")
+                        time.sleep(self.retry_interval)  # 等待配置的重试间隔后重试
                 else:
-                    time.sleep(1)  # 队列为空时等待
+                    time.sleep(self.idle_interval)  # 队列为空时等待配置的空闲间隔
 
             except Exception as e:
                 logging.error(f"调度器循环错误: {e}")
-                time.sleep(5)
+                time.sleep(self.error_interval)  # 发生错误时等待配置的错误间隔
 
     def _execute_task(self, task: Task):
         """执行任务"""
@@ -281,5 +290,7 @@ class TaskScheduler:
             'queue_size': self.task_queue.qsize(),
             'running_tasks': len(self.running_tasks),
             'completed_tasks': len(self.completed_tasks),
-            'scheduler_running': self.is_running
+            'scheduler_running': self.is_running,
+            'retry_interval': self.retry_interval,
+            'idle_interval': self.idle_interval
         }

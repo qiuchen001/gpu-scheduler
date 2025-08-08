@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}GPU调度系统 - 系统配置{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-gear"></i> 系统配置</h2>
+        <p class="text-muted">配置调度器的检查间隔时间</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock"></i> 检查间隔配置
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="config-form">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="retry-interval" class="form-label">重试间隔（秒）</label>
+                                <input type="number" class="form-control" id="retry-interval" 
+                                       min="1" max="300" value="5" required>
+                                <div class="form-text">
+                                    当任务不满足执行条件时，等待多少秒后重新检查
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="idle-interval" class="form-label">空闲间隔（秒）</label>
+                                <input type="number" class="form-control" id="idle-interval" 
+                                       min="1" max="60" value="1" required>
+                                <div class="form-text">
+                                    当队列为空时，等待多少秒后检查新任务
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="error-interval" class="form-label">错误间隔（秒）</label>
+                                <input type="number" class="form-control" id="error-interval" 
+                                       min="1" max="300" value="5" required>
+                                <div class="form-text">
+                                    发生错误时，等待多少秒后继续运行
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> 保存配置
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" onclick="loadConfig()">
+                        <i class="bi bi-arrow-clockwise"></i> 刷新配置
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> 配置说明
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>重试间隔</h6>
+                <p class="text-muted small">
+                    当任务需要GPU但当前GPU不可用时，系统会等待这个时间后重新检查GPU可用性。
+                </p>
+                
+                <h6>空闲间隔</h6>
+                <p class="text-muted small">
+                    当没有任务在队列中时，系统会等待这个时间后检查是否有新任务提交。
+                </p>
+                
+                <h6>错误间隔</h6>
+                <p class="text-muted small">
+                    当调度器发生异常时，系统会等待这个时间后继续运行，避免频繁重试。
+                </p>
+                
+                <hr>
+                
+                <h6>推荐配置</h6>
+                <ul class="list-unstyled small">
+                    <li><strong>快速响应</strong>: 重试1-3秒，空闲1秒</li>
+                    <li><strong>平衡模式</strong>: 重试5-10秒，空闲1-2秒</li>
+                    <li><strong>节能模式</strong>: 重试10-30秒，空闲5-10秒</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> 当前状态
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="current-config">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 配置说明 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightbulb"></i> 配置建议
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>🔄 重试间隔</h6>
+                        <ul class="small">
+                            <li><strong>1-3秒</strong>: 适合GPU资源紧张的环境</li>
+                            <li><strong>5-10秒</strong>: 平衡性能和资源消耗</li>
+                            <li><strong>10-30秒</strong>: 适合GPU资源充足的环境</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>⏰ 空闲间隔</h6>
+                        <ul class="small">
+                            <li><strong>1秒</strong>: 快速响应新任务</li>
+                            <li><strong>2-5秒</strong>: 平衡响应速度和CPU使用</li>
+                            <li><strong>5-10秒</strong>: 减少CPU使用，适合低负载环境</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>⚠️ 错误间隔</h6>
+                        <ul class="small">
+                            <li><strong>5秒</strong>: 快速恢复</li>
+                            <li><strong>10-30秒</strong>: 避免频繁重试</li>
+                            <li><strong>30-60秒</strong>: 等待问题解决</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function loadConfig() {
+    axios.get('/api/config')
+        .then(response => {
+            const config = response.data;
+            
+            document.getElementById('retry-interval').value = config.retry_interval;
+            document.getElementById('idle-interval').value = config.idle_interval;
+            document.getElementById('error-interval').value = config.error_interval;
+            
+            updateCurrentConfig(config);
+        })
+        .catch(error => {
+            console.error('加载配置失败:', error);
+            alert('加载配置失败: ' + error.response?.data?.error || error.message);
+        });
+}
+
+function updateCurrentConfig(config) {
+    const container = document.getElementById('current-config');
+    container.innerHTML = `
+        <div class="row text-center">
+            <div class="col-4">
+                <h6 class="text-primary">${config.retry_interval}s</h6>
+                <small class="text-muted">重试间隔</small>
+            </div>
+            <div class="col-4">
+                <h6 class="text-success">${config.idle_interval}s</h6>
+                <small class="text-muted">空闲间隔</small>
+            </div>
+            <div class="col-4">
+                <h6 class="text-warning">${config.error_interval}s</h6>
+                <small class="text-muted">错误间隔</small>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <small class="text-muted">
+                <i class="bi bi-clock"></i> 
+                最后更新: ${new Date().toLocaleString('zh-CN')}
+            </small>
+        </div>
+    `;
+}
+
+// 提交配置表单
+document.getElementById('config-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const retryInterval = parseInt(document.getElementById('retry-interval').value);
+    const idleInterval = parseInt(document.getElementById('idle-interval').value);
+    const errorInterval = parseInt(document.getElementById('error-interval').value);
+    
+    // 验证输入
+    if (retryInterval < 1 || idleInterval < 1 || errorInterval < 1) {
+        alert('所有间隔时间必须是正整数');
+        return;
+    }
+    
+    axios.post('/api/config', {
+        retry_interval: retryInterval,
+        idle_interval: idleInterval,
+        error_interval: errorInterval
+    })
+    .then(response => {
+        alert('配置已保存！');
+        updateCurrentConfig(response.data);
+    })
+    .catch(error => {
+        alert('保存配置失败: ' + error.response?.data?.error || error.message);
+    });
+});
+
+// 页面加载时获取配置
+document.addEventListener('DOMContentLoaded', function() {
+    loadConfig();
+});
+</script>
+{% endblock %} 

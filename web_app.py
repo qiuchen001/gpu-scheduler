@@ -15,8 +15,12 @@ logging.basicConfig(
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gpu-scheduler-secret-key'
 
-# 全局调度器实例
-scheduler = TaskScheduler()
+# 全局调度器实例 - 使用自定义配置
+scheduler = TaskScheduler(
+    retry_interval=5,    # 重试间隔5秒
+    idle_interval=1,     # 空闲间隔1秒
+    error_interval=5     # 错误间隔5秒
+)
 
 @app.route('/')
 def index():
@@ -100,6 +104,45 @@ def stop_scheduler():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/config', methods=['GET', 'POST'])
+def config_scheduler():
+    """获取或设置调度器配置"""
+    try:
+        if request.method == 'GET':
+            # 获取当前配置
+            return jsonify({
+                'retry_interval': scheduler.retry_interval,
+                'idle_interval': scheduler.idle_interval,
+                'error_interval': scheduler.error_interval
+            })
+        else:
+            # 设置新配置
+            data = request.get_json()
+            retry_interval = data.get('retry_interval', 5)
+            idle_interval = data.get('idle_interval', 1)
+            error_interval = data.get('error_interval', 5)
+            
+            # 验证参数
+            if not all(isinstance(x, int) and x > 0 for x in [retry_interval, idle_interval, error_interval]):
+                return jsonify({'error': '所有间隔时间必须是正整数'}), 400
+            
+            # 更新配置
+            scheduler.retry_interval = retry_interval
+            scheduler.idle_interval = idle_interval
+            scheduler.error_interval = error_interval
+            
+            logging.info(f"调度器配置已更新 - 重试间隔: {retry_interval}s, 空闲间隔: {idle_interval}s, 错误间隔: {error_interval}s")
+            
+            return jsonify({
+                'message': '配置已更新',
+                'retry_interval': retry_interval,
+                'idle_interval': idle_interval,
+                'error_interval': error_interval
+            })
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/dashboard')
 def dashboard():
     """仪表板页面"""
@@ -109,6 +152,11 @@ def dashboard():
 def tasks_page():
     """任务管理页面"""
     return render_template('tasks.html')
+
+@app.route('/config')
+def config_page():
+    """配置页面"""
+    return render_template('config.html')
 
 if __name__ == '__main__':
     # 启动调度器
