@@ -158,6 +158,11 @@ def config_page():
     """配置页面"""
     return render_template('config.html')
 
+@app.route('/logs')
+def logs_page():
+    """日志查看页面"""
+    return render_template('logs.html')
+
 if __name__ == '__main__':
     # 启动调度器
     scheduler.start()

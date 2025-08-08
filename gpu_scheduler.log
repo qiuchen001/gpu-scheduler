@@ -182,3 +182,124 @@
 2025-08-08 14:47:59,612 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 14:47:59] "GET /api/status HTTP/1.1" 200 -
 2025-08-08 14:47:59,614 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 14:47:59] "GET /api/tasks HTTP/1.1" 200 -
 2025-08-08 14:48:04,137 - root - ERROR - GPU监控初始化失败: NVML Shared Library Not Found
+2025-08-08 15:00:26,626 - root - INFO - 收到中断信号，正在关闭...
+2025-08-08 15:00:26,626 - root - INFO - 系统已关闭
+2025-08-08 15:00:27,540 - root - ERROR - GPU监控初始化失败: NVML Shared Library Not Found
+2025-08-08 15:00:31,003 - root - INFO - 任务调度器初始化完成 - 重试间隔: 5s, 空闲间隔: 1s
+2025-08-08 15:00:31,014 - root - INFO - 调度器已启动
+2025-08-08 15:00:31,014 - root - INFO - 调度器已启动
+2025-08-08 15:00:31,014 - root - INFO - 启动Web应用...
+2025-08-08 15:00:31,049 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-08 15:00:31,049 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-08 15:00:34,416 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:34] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:34,956 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:34] "GET /api/status HTTP/1.1" 200 -
+2025-08-08 15:00:34,962 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:34] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:36,110 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:36] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:37,413 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:37] "GET /dashboard HTTP/1.1" 200 -
+2025-08-08 15:00:37,432 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:37] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-08-08 15:00:37,520 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:37] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-08 15:00:37,524 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:37] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-08-08 15:00:37,834 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:37] "GET /api/status HTTP/1.1" 200 -
+2025-08-08 15:00:37,840 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:37] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:41,583 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:41] "GET /api/status HTTP/1.1" 200 -
+2025-08-08 15:00:41,584 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:41] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:47,840 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:47] "GET /api/status HTTP/1.1" 200 -
+2025-08-08 15:00:47,841 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:47] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:49,477 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:49] "GET /tasks HTTP/1.1" 200 -
+2025-08-08 15:00:49,532 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:49] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-08-08 15:00:49,547 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:49] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-08 15:00:49,548 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:49] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-08-08 15:00:49,766 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:49] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:54,777 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:54] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:00:59,776 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:00:59] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:03,628 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:03] "GET /config HTTP/1.1" 200 -
+2025-08-08 15:01:03,719 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:03] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-08-08 15:01:03,738 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:03] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-08-08 15:01:03,738 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:03] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-08 15:01:03,969 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:03] "GET /api/config HTTP/1.1" 200 -
+2025-08-08 15:01:10,193 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:10] "GET /tasks HTTP/1.1" 200 -
+2025-08-08 15:01:10,247 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:10] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-08-08 15:01:10,262 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:10] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-08 15:01:10,263 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:10] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-08-08 15:01:10,471 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:15,477 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:20,596 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:25,484 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:25] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:30,602 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:30] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:35,595 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:35] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:40,593 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:40] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:45,601 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:45] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:50,598 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:50] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:01:55,600 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:01:55] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:00,591 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:00] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:05,600 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:05] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:10,604 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:15,591 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:20,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:25,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:25] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:30,601 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:30] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:35,597 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:35] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:40,596 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:40] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:45,593 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:45] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:50,594 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:50] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:02:55,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:02:55] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:00,589 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:00] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:05,599 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:05] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:10,590 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:15,593 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:20,601 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:25,600 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:25] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:30,587 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:30] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:35,598 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:35] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:40,589 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:40] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:45,601 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:45] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:50,600 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:50] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:03:55,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:03:55] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:00,600 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:00] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:05,471 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:05] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:10,596 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:15,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:20,593 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:25,595 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:25] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:30,594 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:30] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:35,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:35] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:40,591 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:40] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:45,597 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:45] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:50,595 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:50] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:04:55,599 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:04:55] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:05:00,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:05:00] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:05:05,598 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:05:05] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:05:10,590 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:05:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:05:15,601 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:05:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:05:20,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:05:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:06:04,588 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:06:04] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:07:04,591 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:07:04] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:08:04,597 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:08:04] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:09:04,586 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:09:04] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:10:04,594 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:10:04] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:11:04,587 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:11:04] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:00,364 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:00] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:05,599 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:05] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:10,587 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:15,586 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:20,580 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:25,584 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:25] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:30,580 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:30] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:35,582 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:35] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:40,584 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:40] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:45,581 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:45] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:50,585 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:50] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:12:55,575 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:12:55] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:00,575 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:00] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:05,583 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:05] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:10,582 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:10] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:15,578 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:15] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:20,581 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:20] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:25,569 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:25] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:30,567 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:30] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:35,568 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:35] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:13:40,574 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:13:40] "GET /api/tasks HTTP/1.1" 200 -
+2025-08-08 15:14:04,575 - werkzeug - INFO - 127.0.0.1 - - [08/Aug/2025 15:14:04] "GET /api/tasks HTTP/1.1" 200 -

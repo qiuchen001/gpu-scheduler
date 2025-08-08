@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}GPU调度系统 - 日志查看{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-journal-text"></i> 日志查看</h2>
+        <p class="text-muted">查看系统运行日志和脚本执行日志</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-file-text"></i> 日志内容
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="log-type" class="form-label">日志类型</label>
+                            <select class="form-select" id="log-type">
+                                <option value="system">系统日志 (gpu_scheduler.log)</option>
+                                <option value="scripts">脚本日志 (logs/scripts_*.log)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="log-level" class="form-label">日志级别</label>
+                            <select class="form-select" id="log-level">
+                                <option value="all">全部</option>
+                                <option value="INFO">信息</option>
+                                <option value="WARNING">警告</option>
+                                <option value="ERROR">错误</option>
+                                <option value="DEBUG">调试</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="log-filter" 
+                                   placeholder="输入关键词过滤日志...">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary" onclick="loadLogs()">
+                                <i class="bi bi-search"></i> 查看日志
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="clearLogs()">
+                                <i class="bi bi-x-circle"></i> 清空
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="log-content">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-journal-text" style="font-size: 3rem;"></i>
+                        <p>点击"查看日志"按钮加载日志内容</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> 日志说明
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>系统日志</h6>
+                <ul class="small">
+                    <li><strong>任务管理</strong>: 任务提交、执行、完成状态</li>
+                    <li><strong>GPU监控</strong>: GPU状态变化和可用性检查</li>
+                    <li><strong>调度器</strong>: 调度器启动、停止、错误信息</li>
+                    <li><strong>Web应用</strong>: API请求和响应</li>
+                </ul>
+                
+                <h6>脚本日志</h6>
+                <ul class="small">
+                    <li><strong>执行状态</strong>: 脚本开始、成功、失败</li>
+                    <li><strong>性能信息</strong>: 执行时间、退出码</li>
+                    <li><strong>资源分配</strong>: GPU分配、环境变量设置</li>
+                    <li><strong>错误详情</strong>: 执行错误和异常信息</li>
+                </ul>
+                
+                <hr>
+                
+                <h6>日志级别</h6>
+                <ul class="small">
+                    <li><span class="badge bg-info">INFO</span> 一般信息</li>
+                    <li><span class="badge bg-warning">WARNING</span> 警告信息</li>
+                    <li><span class="badge bg-danger">ERROR</span> 错误信息</li>
+                    <li><span class="badge bg-secondary">DEBUG</span> 调试信息</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-gear"></i> 日志操作
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadLogs()">
+                        <i class="bi bi-download"></i> 下载日志
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="clearLogFiles()">
+                        <i class="bi bi-trash"></i> 清空日志文件
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="refreshLogs()">
+                        <i class="bi bi-arrow-clockwise"></i> 实时刷新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 日志详情模态框 -->
+<div class="modal fade" id="logDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">日志详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="log-detail-content">
+                    <!-- 日志详情内容 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let logRefreshInterval;
+
+function loadLogs() {
+    const logType = document.getElementById('log-type').value;
+    const logLevel = document.getElementById('log-level').value;
+    const filter = document.getElementById('log-filter').value;
+    
+    const container = document.getElementById('log-content');
+    container.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在加载日志...</p>
+        </div>
+    `;
+    
+    // 这里应该调用后端API获取日志
+    // 由于没有实现日志API，我们显示模拟数据
+    setTimeout(() => {
+        displayLogs(getMockLogs(logType, logLevel, filter));
+    }, 1000);
+}
+
+function getMockLogs(logType, logLevel, filter) {
+    const logs = [];
+    const now = new Date();
+    
+    if (logType === 'system') {
+        logs.push(
+            `${now.toISOString()} - INFO - 任务已提交: task_1, 需要GPU: 2`,
+            `${now.toISOString()} - INFO - 开始执行任务: task_1`,
+            `${now.toISOString()} - INFO - 检测到脚本类型: python`,
+            `${now.toISOString()} - INFO - 设置CUDA_VISIBLE_DEVICES: 0,1`,
+            `${now.toISOString()} - INFO - 开始执行python脚本: example_script.py, PID: 12345`,
+            `${now.toISOString()} - INFO - python脚本执行成功: example_script.py`,
+            `${now.toISOString()} - INFO - 任务执行成功: task_1`
+        );
+    } else {
+        logs.push(
+            `${now.toISOString()} - INFO - [PYTHON] SCRIPT_TYPE_DETECTED: example_script.py`,
+            `${now.toISOString()} - INFO - [PYTHON] GPU_ASSIGNED: example_script.py - GPU: [0, 1]`,
+            `${now.toISOString()} - INFO - [PYTHON] EXECUTION_STARTED: example_script.py - CMD: python example_script.py`,
+            `${now.toISOString()} - INFO - [PYTHON] PROCESS_STARTED: example_script.py - PID: 12345`,
+            `${now.toISOString()} - INFO - [PYTHON] EXECUTION_SUCCESS: example_script.py - Exit: 0, Time: 10.25s`,
+            `${now.toISOString()} - INFO - [PYTHON] OUTPUT_SUMMARY: example_script.py - Lines: 15, First: 这是一个Python示例任务`
+        );
+    }
+    
+    // 应用过滤
+    if (filter) {
+        return logs.filter(log => log.toLowerCase().includes(filter.toLowerCase()));
+    }
+    
+    if (logLevel !== 'all') {
+        return logs.filter(log => log.includes(` - ${logLevel} -`));
+    }
+    
+    return logs;
+}
+
+function displayLogs(logs) {
+    const container = document.getElementById('log-content');
+    
+    if (logs.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="bi bi-search" style="font-size: 2rem;"></i>
+                <p>没有找到匹配的日志</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="log-container" style="max-height: 600px; overflow-y: auto;">';
+    html += '<pre class="log-content" style="font-size: 0.875rem; line-height: 1.4;">';
+    
+    logs.forEach(log => {
+        const logClass = getLogClass(log);
+        html += `<span class="${logClass}">${escapeHtml(log)}</span>\n`;
+    });
+    
+    html += '</pre></div>';
+    container.innerHTML = html;
+}
+
+function getLogClass(log) {
+    if (log.includes(' - ERROR - ')) return 'text-danger';
+    if (log.includes(' - WARNING - ')) return 'text-warning';
+    if (log.includes(' - DEBUG - ')) return 'text-muted';
+    return 'text-dark';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function clearLogs() {
+    document.getElementById('log-content').innerHTML = `
+        <div class="text-center text-muted">
+            <i class="bi bi-journal-text" style="font-size: 3rem;"></i>
+            <p>点击"查看日志"按钮加载日志内容</p>
+        </div>
+    `;
+}
+
+function downloadLogs() {
+    alert('下载日志功能需要后端API支持');
+}
+
+function clearLogFiles() {
+    if (confirm('确定要清空所有日志文件吗？此操作不可恢复！')) {
+        alert('清空日志文件功能需要后端API支持');
+    }
+}
+
+function refreshLogs() {
+    if (logRefreshInterval) {
+        clearInterval(logRefreshInterval);
+        logRefreshInterval = null;
+        alert('已停止实时刷新');
+    } else {
+        logRefreshInterval = setInterval(loadLogs, 5000);
+        alert('已开启实时刷新，每5秒刷新一次');
+    }
+}
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 可以在这里加载默认日志
+});
+
+// 页面卸载时清理定时器
+window.addEventListener('beforeunload', function() {
+    if (logRefreshInterval) {
+        clearInterval(logRefreshInterval);
+    }
+});
+</script>
+
+<style>
+.log-content {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.log-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+</style>
+{% endblock %} 
