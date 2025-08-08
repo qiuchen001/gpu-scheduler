@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}GPU调度系统 - 任务管理{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-list-task"></i> 任务管理</h2>
+        <p class="text-muted">查看和管理所有任务</p>
+    </div>
+</div>
+
+<!-- 提交新任务 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-plus-circle"></i> 提交新任务
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="submit-task-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="script-path" class="form-label">脚本路径</label>
+                                <input type="text" class="form-control" id="script-path" 
+                                       placeholder="/path/to/your/script.sh 或 /path/to/your/script.py" required>
+                                <div class="form-text">输入要执行的脚本的完整路径（支持Shell和Python脚本）</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">优先级</label>
+                                <select class="form-select" id="priority">
+                                    <option value="0">普通 (0)</option>
+                                    <option value="1">高 (1)</option>
+                                    <option value="2">紧急 (2)</option>
+                                </select>
+                                <div class="form-text">数字越大优先级越高</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">脚本类型</label>
+                                <div class="form-text">
+                                    <small>
+                                        <i class="bi bi-info-circle"></i> 系统会自动检测脚本类型<br>
+                                        • Shell脚本: .sh, .bash<br>
+                                        • Python脚本: .py
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> 提交任务
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 任务列表 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul"></i> 任务列表
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="taskTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" 
+                                data-bs-target="#pending" type="button" role="tab">
+                            等待中 <span class="badge bg-warning" id="pending-count">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="running-tab" data-bs-toggle="tab" 
+                                data-bs-target="#running" type="button" role="tab">
+                            运行中 <span class="badge bg-info" id="running-count">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="completed-tab" data-bs-toggle="tab" 
+                                data-bs-target="#completed" type="button" role="tab">
+                            已完成 <span class="badge bg-success" id="completed-count">0</span>
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content mt-3" id="taskTabsContent">
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        <div id="pending-tasks-list">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-hourglass-split" style="font-size: 2rem;"></i>
+                                <p>暂无等待中的任务</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="running" role="tabpanel">
+                        <div id="running-tasks-list">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-play-circle" style="font-size: 2rem;"></i>
+                                <p>暂无运行中的任务</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="completed" role="tabpanel">
+                        <div id="completed-tasks-list">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                                <p>暂无已完成的任务</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 任务详情模态框 -->
+<div class="modal fade" id="taskDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">任务详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="task-detail-content">
+                    <!-- 任务详情内容 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let tasksUpdateInterval;
+
+function loadTasks() {
+    axios.get('/api/tasks')
+        .then(response => {
+            const tasks = response.data;
+            
+            // 更新计数
+            document.getElementById('pending-count').textContent = tasks.pending.length;
+            document.getElementById('running-count').textContent = tasks.running.length;
+            document.getElementById('completed-count').textContent = tasks.completed.length;
+            
+            // 更新任务列表
+            updateTaskList('pending-tasks-list', tasks.pending, 'pending');
+            updateTaskList('running-tasks-list', tasks.running, 'running');
+            updateTaskList('completed-tasks-list', tasks.completed, 'completed');
+        })
+        .catch(error => {
+            console.error('加载任务失败:', error);
+        });
+}
+
+function updateTaskList(containerId, tasks, status) {
+    const container = document.getElementById(containerId);
+    
+    if (!tasks || tasks.length === 0) {
+        const statusText = {
+            'pending': '等待中',
+            'running': '运行中',
+            'completed': '已完成'
+        };
+        const statusIcon = {
+            'pending': 'hourglass-split',
+            'running': 'play-circle',
+            'completed': 'check-circle'
+        };
+        
+        container.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="bi bi-${statusIcon[status]}" style="font-size: 2rem;"></i>
+                <p>暂无${statusText[status]}的任务</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    tasks.forEach(task => {
+        const statusClass = getStatusClass(task.status);
+        const statusIcon = getStatusIcon(task.status);
+        const priorityClass = getPriorityClass(task.priority);
+        const scriptTypeClass = getScriptTypeClass(task.script_type || 'unknown');
+        const scriptTypeIcon = getScriptTypeIcon(task.script_type || 'unknown');
+        
+        html += `
+            <div class="card mb-3 border-${statusClass}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">
+                                ${task.id}
+                                <span class="badge bg-${statusClass} ms-2">
+                                    <i class="bi bi-${statusIcon}"></i>
+                                    ${getStatusText(task.status)}
+                                </span>
+                                <span class="badge ${priorityClass} ms-1">
+                                    优先级 ${task.priority}
+                                </span>
+                                <span class="badge ${scriptTypeClass} ms-1">
+                                    <i class="bi bi-${scriptTypeIcon}"></i>
+                                    ${getScriptTypeText(task.script_type || 'unknown')}
+                                </span>
+                            </h6>
+                            <p class="card-text text-muted mb-2">
+                                <i class="bi bi-file-earmark-text"></i>
+                                ${task.script_path}
+                            </p>
+                            <div class="row text-muted small">
+                                <div class="col-md-3">
+                                    <i class="bi bi-gpu"></i> 需要GPU: ${task.required_gpus}
+                                </div>
+                                <div class="col-md-3">
+                                    <i class="bi bi-calendar"></i> 创建: ${formatTime(task.created_at)}
+                                </div>
+                                ${task.started_at ? `
+                                    <div class="col-md-3">
+                                        <i class="bi bi-play"></i> 开始: ${formatTime(task.started_at)}
+                                    </div>
+                                ` : ''}
+                                ${task.completed_at ? `
+                                    <div class="col-md-3">
+                                        <i class="bi bi-check"></i> 完成: ${formatTime(task.completed_at)}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    onclick="showTaskDetail('${task.id}')">
+                                <i class="bi bi-eye"></i> 详情
+                            </button>
+                            ${task.status === 'pending' || task.status === 'running' ? `
+                                <button class="btn btn-outline-danger btn-sm" 
+                                        onclick="cancelTask('${task.id}')">
+                                    <i class="bi bi-x-circle"></i> 取消
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ${task.error_message ? `
+                        <div class="alert alert-danger mt-2 mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>错误:</strong> ${task.error_message}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getStatusClass(status) {
+    const statusMap = {
+        'pending': 'warning',
+        'running': 'info',
+        'completed': 'success',
+        'failed': 'danger',
+        'cancelled': 'secondary'
+    };
+    return statusMap[status] || 'secondary';
+}
+
+function getStatusIcon(status) {
+    const iconMap = {
+        'pending': 'hourglass-split',
+        'running': 'play-circle',
+        'completed': 'check-circle',
+        'failed': 'x-circle',
+        'cancelled': 'x-circle'
+    };
+    return iconMap[status] || 'question-circle';
+}
+
+function getStatusText(status) {
+    const textMap = {
+        'pending': '等待中',
+        'running': '运行中',
+        'completed': '已完成',
+        'failed': '失败',
+        'cancelled': '已取消'
+    };
+    return textMap[status] || status;
+}
+
+function getPriorityClass(priority) {
+    if (priority >= 2) return 'bg-danger';
+    if (priority >= 1) return 'bg-warning';
+    return 'bg-secondary';
+}
+
+function getScriptTypeClass(scriptType) {
+    const typeMap = {
+        'python': 'bg-success',
+        'shell': 'bg-primary',
+        'unknown': 'bg-secondary'
+    };
+    return typeMap[scriptType] || 'bg-secondary';
+}
+
+function getScriptTypeIcon(scriptType) {
+    const iconMap = {
+        'python': 'code-slash',
+        'shell': 'terminal',
+        'unknown': 'question-circle'
+    };
+    return iconMap[scriptType] || 'question-circle';
+}
+
+function getScriptTypeText(scriptType) {
+    const textMap = {
+        'python': 'Python',
+        'shell': 'Shell',
+        'unknown': '未知'
+    };
+    return textMap[scriptType] || '未知';
+}
+
+function formatTime(timeStr) {
+    if (!timeStr) return '-';
+    const date = new Date(timeStr);
+    return date.toLocaleString('zh-CN');
+}
+
+function showTaskDetail(taskId) {
+    axios.get(`/api/task/${taskId}`)
+        .then(response => {
+            const task = response.data;
+            const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+            
+            document.getElementById('task-detail-content').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>基本信息</h6>
+                        <table class="table table-sm">
+                            <tr><td>任务ID</td><td>${task.id}</td></tr>
+                            <tr><td>脚本路径</td><td>${task.script_path}</td></tr>
+                            <tr><td>脚本类型</td><td>
+                                <span class="badge ${getScriptTypeClass(task.script_type || 'unknown')}">
+                                    ${getScriptTypeText(task.script_type || 'unknown')}
+                                </span>
+                            </td></tr>
+                            <tr><td>状态</td><td>
+                                <span class="badge bg-${getStatusClass(task.status)}">
+                                    ${getStatusText(task.status)}
+                                </span>
+                            </td></tr>
+                            <tr><td>优先级</td><td>${task.priority}</td></tr>
+                            <tr><td>需要GPU</td><td>${task.required_gpus}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>时间信息</h6>
+                        <table class="table table-sm">
+                            <tr><td>创建时间</td><td>${formatTime(task.created_at)}</td></tr>
+                            <tr><td>开始时间</td><td>${formatTime(task.started_at)}</td></tr>
+                            <tr><td>完成时间</td><td>${formatTime(task.completed_at)}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                ${task.error_message ? `
+                    <div class="alert alert-danger mt-3">
+                        <h6>错误信息</h6>
+                        <p class="mb-0">${task.error_message}</p>
+                    </div>
+                ` : ''}
+                ${task.output ? `
+                    <div class="mt-3">
+                        <h6>输出日志</h6>
+                        <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">${task.output}</pre>
+                    </div>
+                ` : ''}
+            `;
+            
+            modal.show();
+        })
+        .catch(error => {
+            alert('获取任务详情失败: ' + error.response?.data?.error || error.message);
+        });
+}
+
+function cancelTask(taskId) {
+    if (confirm('确定要取消这个任务吗？')) {
+        axios.post(`/api/task/${taskId}/cancel`)
+            .then(response => {
+                alert('任务已取消');
+                loadTasks();
+            })
+            .catch(error => {
+                alert('取消任务失败: ' + error.response?.data?.error || error.message);
+            });
+    }
+}
+
+// 提交任务表单
+document.getElementById('submit-task-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const scriptPath = document.getElementById('script-path').value;
+    const priority = parseInt(document.getElementById('priority').value);
+    
+    if (!scriptPath) {
+        alert('请输入脚本路径');
+        return;
+    }
+    
+    axios.post('/api/submit', {
+        script_path: scriptPath,
+        priority: priority
+    })
+    .then(response => {
+        alert('任务提交成功！任务ID: ' + response.data.task_id);
+        document.getElementById('script-path').value = '';
+        loadTasks();
+    })
+    .catch(error => {
+        alert('提交任务失败: ' + error.response?.data?.error || error.message);
+    });
+});
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadTasks();
+    
+    // 每5秒自动刷新
+    tasksUpdateInterval = setInterval(loadTasks, 5000);
+});
+
+// 页面卸载时清理定时器
+window.addEventListener('beforeunload', function() {
+    if (tasksUpdateInterval) {
+        clearInterval(tasksUpdateInterval);
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}GPU调度系统 - 仪表板{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-speedometer2"></i> 系统仪表板</h2>
+        <p class="text-muted">实时监控GPU状态和系统运行情况</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- GPU状态卡片 -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="bi bi-cpu text-primary" style="font-size: 2rem;"></i>
+                <h3 class="card-title mt-2" id="total-gpus">-</h3>
+                <p class="card-text text-muted">总GPU数</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                <h3 class="card-title mt-2" id="available-gpus">-</h3>
+                <p class="card-text text-muted">可用GPU</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <i class="bi bi-hourglass-split text-warning" style="font-size: 2rem;"></i>
+                <h3 class="card-title mt-2" id="queue-size">-</h3>
+                <p class="card-text text-muted">队列任务</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="bi bi-play-circle text-info" style="font-size: 2rem;"></i>
+                <h3 class="card-title mt-2" id="running-tasks">-</h3>
+                <p class="card-text text-muted">运行任务</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- GPU详细信息 -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul"></i> GPU详细信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="gpu-details">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 系统控制 -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-gear"></i> 系统控制
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="startScheduler()">
+                        <i class="bi bi-play-fill"></i> 启动调度器
+                    </button>
+                    <button class="btn btn-danger" onclick="stopScheduler()">
+                        <i class="bi bi-stop-fill"></i> 停止调度器
+                    </button>
+                </div>
+                
+                <hr>
+                
+                <h6>调度器状态</h6>
+                <div class="d-flex align-items-center">
+                    <span id="scheduler-status-indicator" class="badge bg-success me-2">
+                        <i class="bi bi-circle-fill"></i>
+                    </span>
+                    <span id="scheduler-status-text">运行中</span>
+                </div>
+                
+                <hr>
+                
+                <h6>快速操作</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshStatus()">
+                        <i class="bi bi-arrow-clockwise"></i> 刷新状态
+                    </button>
+                    <a href="/tasks" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-list-task"></i> 查看任务
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 任务概览 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up"></i> 任务概览
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-warning" id="pending-tasks">-</h4>
+                            <p class="text-muted">等待中</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-info" id="running-tasks-overview">-</h4>
+                            <p class="text-muted">运行中</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h4 class="text-success" id="completed-tasks">-</h4>
+                            <p class="text-muted">已完成</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let statusUpdateInterval;
+
+function updateDashboard() {
+    // 获取系统状态
+    axios.get('/api/status')
+        .then(response => {
+            const status = response.data;
+            
+            // 更新统计卡片
+            document.getElementById('total-gpus').textContent = status.gpu_status.total_gpus;
+            document.getElementById('available-gpus').textContent = status.gpu_status.available_gpus;
+            document.getElementById('queue-size').textContent = status.queue_size;
+            document.getElementById('running-tasks').textContent = status.running_tasks;
+            document.getElementById('running-tasks-overview').textContent = status.running_tasks;
+            
+            // 更新调度器状态
+            const indicator = document.getElementById('scheduler-status-indicator');
+            const statusText = document.getElementById('scheduler-status-text');
+            
+            if (status.scheduler_running) {
+                indicator.className = 'badge bg-success me-2';
+                indicator.innerHTML = '<i class="bi bi-circle-fill"></i>';
+                statusText.textContent = '运行中';
+            } else {
+                indicator.className = 'badge bg-danger me-2';
+                indicator.innerHTML = '<i class="bi bi-circle-fill"></i>';
+                statusText.textContent = '已停止';
+            }
+            
+            // 更新GPU详细信息
+            updateGPUDetails(status.gpu_status.gpu_details);
+        })
+        .catch(error => {
+            console.error('获取状态失败:', error);
+        });
+    
+    // 获取任务信息
+    axios.get('/api/tasks')
+        .then(response => {
+            const tasks = response.data;
+            
+            document.getElementById('pending-tasks').textContent = tasks.pending.length;
+            document.getElementById('completed-tasks').textContent = tasks.completed.length;
+        })
+        .catch(error => {
+            console.error('获取任务信息失败:', error);
+        });
+}
+
+function updateGPUDetails(gpuDetails) {
+    const container = document.getElementById('gpu-details');
+    
+    if (!gpuDetails || gpuDetails.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted">暂无GPU信息</div>';
+        return;
+    }
+    
+    let html = '<div class="row">';
+    
+    gpuDetails.forEach((gpu, index) => {
+        const statusClass = gpu.is_available ? 'success' : 'danger';
+        const statusIcon = gpu.is_available ? 'check-circle' : 'x-circle';
+        const utilizationClass = gpu.gpu_utilization > 80 ? 'danger' : 
+                               gpu.gpu_utilization > 50 ? 'warning' : 'success';
+        
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-${statusClass}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="card-title mb-0">GPU ${gpu.index}</h6>
+                            <span class="badge bg-${statusClass}">
+                                <i class="bi bi-${statusIcon}"></i>
+                                ${gpu.is_available ? '可用' : '占用'}
+                            </span>
+                        </div>
+                        <p class="card-text small text-muted">${gpu.name}</p>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <small class="text-muted">GPU利用率</small>
+                                <div class="text-${utilizationClass}">${gpu.gpu_utilization}%</div>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">内存利用率</small>
+                                <div class="text-${gpu.memory_utilization > 80 ? 'danger' : 'success'}">${gpu.memory_utilization}%</div>
+                            </div>
+                        </div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-${utilizationClass}" 
+                                 style="width: ${gpu.gpu_utilization}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function startScheduler() {
+    axios.post('/api/start')
+        .then(response => {
+            alert('调度器已启动');
+            updateDashboard();
+        })
+        .catch(error => {
+            alert('启动调度器失败: ' + (error.response?.data?.error || error.message));
+        });
+}
+
+function stopScheduler() {
+    if (confirm('确定要停止调度器吗？')) {
+        axios.post('/api/stop')
+            .then(response => {
+                alert('调度器已停止');
+                updateDashboard();
+            })
+            .catch(error => {
+                alert('停止调度器失败: ' + (error.response?.data?.error || error.message));
+            });
+    }
+}
+
+function refreshStatus() {
+    updateDashboard();
+}
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    updateDashboard();
+    
+    // 每10秒自动刷新
+    statusUpdateInterval = setInterval(updateDashboard, 10000);
+});
+
+// 页面卸载时清理定时器
+window.addEventListener('beforeunload', function() {
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
+    }
+});
+</script>
+{% endblock %} 

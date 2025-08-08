@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}GPU调度系统 - 主页{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-house"></i> 欢迎使用GPU调度系统
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    这是一个智能的GPU监控调度系统，可以自动检测GPU使用情况并调度任务执行。
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>主要功能：</h6>
+                        <ul>
+                            <li>实时监控GPU状态</li>
+                            <li>自动解析脚本GPU需求</li>
+                            <li>智能任务调度</li>
+                            <li>Web界面管理</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>使用方法：</h6>
+                        <ol>
+                            <li>在脚本中指定 <code>CUDA_VISIBLE_DEVICES</code></li>
+                            <li>提交脚本到系统</li>
+                            <li>系统自动检测GPU可用性</li>
+                            <li>满足条件时自动执行</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning"></i> 快速操作
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/dashboard" class="btn btn-primary">
+                        <i class="bi bi-speedometer2"></i> 查看仪表板
+                    </a>
+                    <a href="/tasks" class="btn btn-outline-primary">
+                        <i class="bi bi-list-task"></i> 任务管理
+                    </a>
+                    <button class="btn btn-outline-success" onclick="submitSampleTask()">
+                        <i class="bi bi-play-circle"></i> 提交示例任务
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-info-circle"></i> 系统状态
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="system-status">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-code-slash"></i> 脚本示例
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>以下是一个示例脚本，展示了如何指定GPU需求：</p>
+                <pre><code>#!/bin/bash
+
+# 指定使用GPU 6和7
+CUDA_VISIBLE_DEVICES=6,7 \
+swift rollout \
+    --model Qwen/Qwen2.5-VL-3B-Instruct \
+    --vllm_data_parallel_size 2
+
+echo "任务执行完成"
+</code></pre>
+                <p class="text-muted">
+                    <small>
+                        <i class="bi bi-info-circle"></i> 
+                        系统会自动解析 <code>CUDA_VISIBLE_DEVICES</code> 参数来确定需要的GPU数量。
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitSampleTask() {
+    // 创建示例脚本
+    const sampleScript = `#!/bin/bash
+
+# 示例脚本 - 使用GPU 0,1
+CUDA_VISIBLE_DEVICES=0,1 \\
+echo "这是一个示例任务" \\
+&& echo "当前时间: $(date)" \\
+&& echo "使用GPU: $CUDA_VISIBLE_DEVICES" \\
+&& sleep 10 \\
+&& echo "任务完成"
+`;
+    
+    // 创建临时文件并提交
+    const blob = new Blob([sampleScript], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    // 这里应该上传文件到服务器，但为了演示，我们直接提交
+    axios.post('/api/submit', {
+        script_path: '/tmp/sample_script.sh',
+        priority: 0
+    })
+    .then(response => {
+        alert('示例任务已提交！任务ID: ' + response.data.task_id);
+    })
+    .catch(error => {
+        alert('提交任务失败: ' + error.response?.data?.error || error.message);
+    });
+}
+
+// 加载系统状态
+function loadSystemStatus() {
+    axios.get('/api/status')
+        .then(response => {
+            const status = response.data;
+            const statusHtml = `
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">${status.gpu_status.total_gpus}</h4>
+                        <small class="text-muted">总GPU数</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">${status.gpu_status.available_gpus}</h4>
+                        <small class="text-muted">可用GPU</small>
+                    </div>
+                </div>
+                <div class="row text-center mt-2">
+                    <div class="col-6">
+                        <h4 class="text-warning">${status.queue_size}</h4>
+                        <small class="text-muted">队列任务</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-info">${status.running_tasks}</h4>
+                        <small class="text-muted">运行任务</small>
+                    </div>
+                </div>
+            `;
+            document.getElementById('system-status').innerHTML = statusHtml;
+        })
+        .catch(error => {
+            document.getElementById('system-status').innerHTML = 
+                '<div class="text-danger">加载状态失败</div>';
+        });
+}
+
+// 页面加载时获取状态
+document.addEventListener('DOMContentLoaded', function() {
+    loadSystemStatus();
+    // 每30秒刷新一次状态
+    setInterval(loadSystemStatus, 30000);
+});
+</script>
+{% endblock %} 

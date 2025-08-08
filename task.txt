@@ -1,0 +1,10 @@
+这是一个GPU监控调度系统
+1. 用户可以向系统提供待执行的脚本的路径，脚本类型为shell
+2. 系统检测执行脚本所需要的GPU数量，执行脚本所需要的GPU数量，在脚本中会指定，比如：CUDA_VISIBLE_DEVICES=0,1,2,3,4,5，那么这里就是需要6个
+3. 系统检查系统中剩余未占用的GPU数量，如果剩余未占用的数量满足执行脚本所需要的GPU个数就执行脚本，否则轮询查看执行条件，直到满足执行条件并执行脚本
+
+脚本示例：
+CUDA_VISIBLE_DEVICES=6,7 \
+swift rollout \
+    --model Qwen/Qwen2.5-VL-3B-Instruct \
+    --vllm_data_parallel_size 2
